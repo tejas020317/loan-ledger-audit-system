@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Search, Eye, Trash2, FileText, CheckCircle, Calculator } from "lucide-react";
 import Link from "next/link";
 import { loanApi, customerApi, Loan, Customer } from "@/lib/api";
 import { toast } from "@/components/Toast";
@@ -74,58 +75,65 @@ export default function LoansPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Loans</h1>
-        <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+      <div className="page-header mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Loans</h1>
+        </div>
+        <div className="flex items-center gap-3">
           <input className="input" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 220 }} />
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>➕ New Loan</button>
+          <button className="btn btn-primary shadow-sm" onClick={() => setShowModal(true)}>➕ New Loan</button>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card overflow-hidden outline-none !p-0">
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Loan ID</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Rate</th>
-                <th>Type</th>
-                <th>Start Date</th>
-                <th>Duration</th>
-                <th>Actions</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Loan ID</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Amount</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Rate</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Start Date</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Duration</th>
+                <th className="h-12 px-4 text-center align-middle font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan={8} style={{ textAlign: "center", padding: "3rem" }}><div className="spinner" style={{ margin: "auto" }} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} className="empty-state">No loans found</td></tr>
+                <tr><td colSpan={8} className="h-24 text-center text-muted-foreground">No loans found</td></tr>
               ) : filtered.map((l) => (
-                <tr key={l.loan_id}>
-                  <td style={{ fontWeight: 600, color: "var(--accent)" }}>#{l.loan_id}</td>
-                  <td>{l.customer?.name ?? `Customer #${l.customer_id}`}</td>
-                  <td style={{ fontWeight: 600 }}>{fmt(l.loan_amount)}</td>
-                  <td>{l.interest_rate}%</td>
-                  <td>
-                    <span className={`badge ${l.interest_type === "simple" ? "badge-info" : l.interest_type === "compound" ? "badge-warning" : "badge-success"}`}>
-                      {l.interest_type}
-                    </span>
+                <tr key={l.loan_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                  <td className="p-4 align-middle font-medium text-primary">#{l.loan_id}</td>
+                  <td className="p-4 align-middle">{l.customer?.name ?? `Customer #${l.customer_id}`}</td>
+                  <td className="p-4 align-middle font-medium text-foreground">{fmt(l.loan_amount)}</td>
+                  <td className="p-4 align-middle">{l.interest_rate}%</td>
+                  <td className="p-4 align-middle">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${l.interest_type === "simple" ? "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/30" : l.interest_type === "compound" ? "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/30" : "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30"}`}>
+                        {l.interest_type}
+                      </span>
                   </td>
-                  <td style={{ color: "var(--text-muted)" }}>{new Date(l.loan_start_date).toLocaleDateString("en-IN")}</td>
-                  <td>{l.duration_months} mo</td>
-                  <td>
-                    <Link href={`/loans/${l.loan_id}`} className="btn btn-secondary" style={{ padding: ".3rem .75rem", fontSize: ".8rem" }}>
-                      View →
-                    </Link>
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleDelete(l.loan_id)}
-                      style={{ background: 'var(--danger)', color: 'white', marginLeft: '0.5rem', fontSize: '0.75rem', padding: '0.4rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
+                  <td className="p-4 align-middle text-muted-foreground">{new Date(l.loan_start_date).toLocaleDateString("en-IN")}</td>
+                  <td className="p-4 align-middle">{l.duration_months} mo</td>
+                  <td className="p-4 align-middle text-center w-[180px]">
+                    <div className="flex items-center justify-center gap-2">
+                      <Link 
+                        href={`/loans/${l.loan_id}`} 
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                      >
+                        <Eye className="w-3.5 h-3.5"/> View
+                      </Link>
+                      <button 
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                        onClick={() => handleDelete(l.loan_id)}
+                        title="Delete Loan"
+                      >
+                        <Trash2 className="w-3.5 h-3.5"/>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -135,8 +143,8 @@ export default function LoansPage() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Create New Loan</h2>
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>

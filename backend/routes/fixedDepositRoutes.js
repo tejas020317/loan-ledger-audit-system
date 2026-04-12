@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { create, getAll, getOne, calculate, remove } = require("../controllers/fixedDepositController");
+const { create, getAll, getOne, calculate, remove, addDeposit } = require("../controllers/fixedDepositController");
 
 // POST   /api/fixed-deposits/calculate  — preview maturity (no DB write)
 // NOTE: must be defined before /:id to avoid Express treating "calculate" as an ID
@@ -14,6 +14,9 @@ router.get("/", getAll);
 
 // GET    /api/fixed-deposits/:id         — single FD with maturity details
 router.get("/:id", getOne);
+
+// POST   /api/fixed-deposits/:id/deposits — add a flexible deposit
+router.post("/:id/deposits", addDeposit);
 
 // DELETE /api/fixed-deposits/:id
 router.delete("/:id", remove);

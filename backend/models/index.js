@@ -6,6 +6,7 @@ const Customer = require("./Customer");
 const Loan = require("./Loan");
 const Payment = require("./Payment");
 const FixedDeposit = require("./FixedDeposit");
+const FdTransaction = require("./FdTransaction");
 const AuditLog = require("./AuditLog");
 const LoanTransaction = require("./LoanTransaction");
 
@@ -29,6 +30,10 @@ LoanTransaction.belongsTo(Loan, { foreignKey: "loan_id", as: "loan" });
 Customer.hasMany(FixedDeposit, { foreignKey: "customer_id", as: "fixedDeposits" });
 FixedDeposit.belongsTo(Customer, { foreignKey: "customer_id", as: "customer" });
 
+// FixedDeposit ──< FdTransaction (one-to-many)
+FixedDeposit.hasMany(FdTransaction, { foreignKey: "fd_id", as: "transactions" });
+FdTransaction.belongsTo(FixedDeposit, { foreignKey: "fd_id", as: "fixedDeposit" });
+
 // User ──< AuditLogs (one-to-many)
 User.hasMany(AuditLog, { foreignKey: "user_id", as: "auditLogs" });
 AuditLog.belongsTo(User, { foreignKey: "user_id", as: "user" });
@@ -40,6 +45,7 @@ module.exports = {
   Loan,
   Payment,
   FixedDeposit,
+  FdTransaction,
   AuditLog,
   LoanTransaction,
 };

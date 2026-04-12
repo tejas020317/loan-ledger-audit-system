@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Search, Eye, Trash2, FileText, CheckCircle, Calculator } from "lucide-react";
 import { loanApi, paymentApi, Loan, Payment } from "@/lib/api";
 import { toast } from "@/components/Toast";
 
@@ -69,9 +70,11 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Payments</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>➕ Add Payment</button>
+      <div className="page-header mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Loan Payments</h1>
+        </div>
+        <button className="btn btn-primary shadow-sm" onClick={() => setShowModal(true)}><Plus className="mr-2 w-4 h-4"/> Add Payment</button>
       </div>
 
       {/* Loan selector */}
@@ -87,7 +90,7 @@ export default function PaymentsPage() {
             </select>
           </div>
           {loanId && (
-            <button className="btn btn-secondary" onClick={() => loadPayments()} disabled={fetching}>
+            <button className="btn btn-secondary border-border shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" onClick={() => loadPayments()} disabled={fetching}>
               {fetching ? "Loading…" : "🔄 Refresh"}
             </button>
           )}
@@ -96,47 +99,49 @@ export default function PaymentsPage() {
 
       {loan && (
         <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-          <h2 style={{ fontWeight: 600 }}>Loan #{loan.loan_id} — {loan.customer?.name}</h2>
-          <span className="badge badge-info">{fmt(loan.loan_amount)}</span>
-          <span className="badge badge-warning">{loan.interest_rate}% {loan.interest_type}</span>
+          <h2 className="p-4 align-middle font-medium text-foreground">Loan #{loan.loan_id} — {loan.customer?.name}</h2>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30">{fmt(loan.loan_amount)}</span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30">{loan.interest_rate}% {loan.interest_type}</span>
         </div>
       )}
 
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card overflow-hidden outline-none !p-0">
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Payment Date</th>
-                <th>Amount</th>
-                <th>Remarks</th>
-                <th>Recorded On</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">#</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Payment Date</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Amount</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Remarks</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Recorded On</th>
+                <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {fetching ? (
                 <tr><td colSpan={6} style={{ textAlign: "center", padding: "3rem" }}><div className="spinner" style={{ margin: "auto" }} /></td></tr>
               ) : !loanId ? (
-                <tr><td colSpan={6} className="empty-state">Select a loan above to view its payment history</td></tr>
+                <tr><td colSpan={6} className="h-24 text-center text-muted-foreground">Select a loan above to view its payment history</td></tr>
               ) : payments.length === 0 ? (
-                <tr><td colSpan={6} className="empty-state">No payments recorded for this loan yet</td></tr>
+                <tr><td colSpan={6} className="h-24 text-center text-muted-foreground">No payments recorded for this loan yet</td></tr>
               ) : payments.map((p, i) => (
-                <tr key={p.payment_id}>
-                  <td style={{ color: "var(--text-muted)" }}>{i + 1}</td>
-                  <td style={{ fontWeight: 500 }}>{new Date(p.payment_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                <tr key={p.payment_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                  <td className="p-4 align-middle text-muted-foreground">{i + 1}</td>
+                  <td className="p-4 align-middle font-medium">{new Date(p.payment_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
                   <td style={{ fontWeight: 700, color: "#10b981" }}>{fmt(p.payment_amount)}</td>
-                  <td style={{ color: "var(--text-muted)" }}>{p.remarks ?? "—"}</td>
-                  <td style={{ color: "var(--text-muted)", fontSize: ".8rem" }}>{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleDelete(p.payment_id)}
-                      style={{ background: 'var(--danger)', color: 'white', fontSize: '0.75rem', padding: '0.4rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
+                  <td className="p-4 align-middle text-muted-foreground">{p.remarks ?? "—"}</td>
+                  <td className="p-4 align-middle text-sm text-muted-foreground">{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                  <td className="p-4 align-middle text-center w-[180px]">
+                    <div className="flex justify-center">
+                      <button 
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                        onClick={() => handleDelete(p.payment_id)}
+                        title="Delete Payment"
+                      >
+                        <Trash2 className="w-3.5 h-3.5"/>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -146,8 +151,8 @@ export default function PaymentsPage() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Record Payment</h2>
             <form onSubmit={handleAddPayment} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>

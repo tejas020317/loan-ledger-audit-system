@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Search, Eye, Trash2, FileText, CheckCircle, Calculator } from "lucide-react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { loanApi, paymentApi, reportApi, Loan, LoanCalculation, Payment } from "@/lib/api";
@@ -102,10 +103,10 @@ export default function LoanDetailPage() {
           <p style={{ fontSize: ".875rem", color: "var(--text-muted)" }}>{loan.customer?.name} — {loan.customer?.account_number}</p>
         </div>
         <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button className="btn btn-secondary" onClick={() => reportApi.downloadLoanLedger(loanId).catch(console.error)}>📄 PDF Ledger</button>
-          <button className="btn btn-secondary" onClick={() => reportApi.downloadLoanLedgerCSV(loanId).catch(console.error)}>📄 CSV Ledger</button>
-          <button className="btn btn-primary" onClick={() => setShowModal("withdrawal")}>➕ Withdrawal</button>
-          <button className="btn btn-primary" onClick={() => setShowModal("payment")}>💰 Add Payment</button>
+          <button className="btn btn-secondary border-border shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" onClick={() => reportApi.downloadLoanLedger(loanId).catch(console.error)}>📄 PDF Ledger</button>
+          <button className="btn btn-secondary border-border shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" onClick={() => reportApi.downloadLoanLedgerCSV(loanId).catch(console.error)}>📄 CSV Ledger</button>
+          <button className="btn btn-primary shadow-sm" onClick={() => setShowModal("withdrawal")}>➕ Withdrawal</button>
+          <button className="btn btn-primary shadow-sm" onClick={() => setShowModal("payment")}>💰 Add Payment</button>
         </div>
       </div>
 
@@ -153,9 +154,9 @@ export default function LoanDetailPage() {
               { label: "Interest Rate", value: `${loan.interest_rate}%` },
               { label: "Calculation Type", value: calc?.type ?? "—" },
             ].map((r) => (
-              <div key={r.label} style={{ padding: ".75rem", background: "#f8fafc", borderRadius: 8 }}>
-                <div style={{ fontSize: ".7rem", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", marginBottom: ".25rem" }}>{r.label}</div>
-                <div style={{ fontWeight: 600 }}>{r.value}</div>
+              <div key={r.label} className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-border/40 dark:border-white/10">
+                <div className="text-[0.7rem] text-muted-foreground font-semibold uppercase mb-1">{r.label}</div>
+                <div className="font-medium text-foreground">{r.value}</div>
               </div>
             ))}
           </div>
@@ -163,23 +164,23 @@ export default function LoanDetailPage() {
       )}
 
       {tab === "ledger" && ledgerData && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card overflow-hidden outline-none !p-0">
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Deposit</th>
-                  <th>Interest</th>
-                  <th>Principal</th>
-                  <th>Withdrawal</th>
-                  <th>Remaining Balance</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Deposit</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Interest</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Principal</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Withdrawal</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Remaining Balance</th>
                 </tr>
               </thead>
               <tbody>
                 {ledgerData.ledger.map((r: any, idx: number) => (
-                  <tr key={idx}>
-                    <td>{new Date(r.date).toLocaleDateString("en-IN")}</td>
+                  <tr key={idx} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                    <td className="p-4 align-middle">{new Date(r.date).toLocaleDateString("en-IN")}</td>
                     <td style={{ color: r.payment > 0 ? "var(--text)" : "var(--text-muted)", fontWeight: r.payment > 0 ? 600 : 400 }}>{r.payment > 0 ? fmt(r.payment) : "-"}</td>
                     <td style={{ color: r.interest_charged > 0 ? "var(--text)" : "var(--text-muted)" }}>{r.interest_charged > 0 ? fmt(r.interest_charged) : "-"}</td>
                     <td style={{ color: r.principal_paid > 0 ? "var(--text)" : "var(--text-muted)" }}>{r.principal_paid > 0 ? fmt(r.principal_paid) : "-"}</td>
@@ -194,25 +195,25 @@ export default function LoanDetailPage() {
       )}
 
       {tab === "payments" && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card overflow-hidden outline-none !p-0">
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Payment Date</th>
-                  <th>Amount</th>
-                  <th>Remarks</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Payment Date</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Amount</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Remarks</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.length === 0 ? (
-                  <tr><td colSpan={3} className="empty-state">No payments recorded yet</td></tr>
+                  <tr><td colSpan={3} className="h-24 text-center text-muted-foreground">No payments recorded yet</td></tr>
                 ) : payments.map((p) => {
                   return (
-                    <tr key={p.payment_id}>
-                      <td>{new Date(p.payment_date).toLocaleDateString("en-IN")}</td>
-                      <td style={{ fontWeight: 600 }}>{fmt(p.payment_amount)}</td>
-                      <td style={{ color: "var(--text-muted)" }}>{p.remarks ?? "—"}</td>
+                    <tr key={p.payment_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                      <td className="p-4 align-middle">{new Date(p.payment_date).toLocaleDateString("en-IN")}</td>
+                      <td className="p-4 align-middle font-medium text-foreground">{fmt(p.payment_amount)}</td>
+                      <td className="p-4 align-middle text-muted-foreground">{p.remarks ?? "—"}</td>
                     </tr>
                   );
                 })}
@@ -224,8 +225,8 @@ export default function LoanDetailPage() {
 
       {/* Add Payment Modal */}
       {showModal === "payment" && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Add Payment — Loan #{loanId}</h2>
             <form onSubmit={handleAddPayment} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>
@@ -256,8 +257,8 @@ export default function LoanDetailPage() {
 
       {/* Add Withdrawal Modal */}
       {showModal === "withdrawal" && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Loan Withdrawal — Loan #{loanId}</h2>
             <form onSubmit={handleAddWithdrawal} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>

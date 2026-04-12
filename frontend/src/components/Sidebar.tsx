@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,8 +9,9 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/loans", label: "Loans", icon: CreditCard },
-  { href: "/payments", label: "Payments", icon: DollarSign },
+  { href: "/payments", label: "Loan Payments", icon: DollarSign },
   { href: "/fd", label: "Fixed Deposits", icon: PiggyBank },
+  { href: "/fd-deposits", label: "FD Deposits", icon: DollarSign },
   { href: "/reports", label: "Reports", icon: FileBarChart },
 ];
 
@@ -26,49 +27,46 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }: SidebarProps) 
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
-          className={"fixed inset-0 z-40 bg-black/50 md:hidden transition-opacity"}
+          className={"fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden transition-opacity"}
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[var(--border)] bg-[var(--sidebar-bg)] shadow-md transition-all duration-300 ease-in-out md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border/50 bg-white/70 dark:bg-black/40 backdrop-blur-xl shadow-lg md:shadow-none transition-all duration-300 ease-in-out md:static md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } ${isCollapsed ? "w-[70px]" : "w-64"} flex-shrink-0`}
+        } ${isCollapsed ? "w-[80px]" : "w-64"} flex-shrink-0`}
       >
         {/* Logo Section */}
         <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} px-6 py-5 h-16 shrink-0`}>
           {!isCollapsed && (
-            <div className="overflow-hidden whitespace-nowrap">
-              <div className="text-xl font-bold leading-tight text-[var(--accent)] dark:text-[var(--accent-light)]">
-                BankLoan
+            <div className="overflow-hidden whitespace-nowrap flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+                <CreditCard className="h-4 w-4 text-primary" />
               </div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">
-                Loan & Deposit Manager
+              <div className="text-lg font-semibold tracking-tight text-foreground">
+                BankLoan
               </div>
             </div>
           )}
           {isCollapsed && (
-            <div className="text-xl font-bold leading-tight text-[var(--accent)] dark:text-[var(--accent-light)]">
-              B
+            <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+              <CreditCard className="h-4 w-4 text-primary" />
             </div>
           )}
-          <button onClick={onClose} className="md:hidden text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0">
-            <X className="h-5 w-5" />
-          </button>
+          {!isCollapsed && (
+            <button onClick={onClose} className="md:hidden text-muted-foreground hover:text-foreground shrink-0">
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
-        {/* Divider */}
-        <div className="mx-5 h-px bg-[var(--border)] shrink-0" />
-
         {/* Navigation */}
-        <nav className="flex flex-1 flex-col gap-2 p-4 overflow-y-auto mt-2">
+        <nav className="flex flex-1 flex-col gap-1 px-3 py-4 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
-            const active = pathname.startsWith(item.href);
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const Icon = item.icon;
 
             return (
@@ -78,19 +76,23 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }: SidebarProps) 
                 onClick={() => {
                   if (typeof window !== "undefined" && window.innerWidth < 768) onClose();
                 }}
-                className={`flex items-center rounded-xl transition-all duration-200 group ${
-                  isCollapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
+                className={`flex items-center relative rounded-lg transition-all duration-200 group ${
+                  isCollapsed ? "justify-center px-0 py-3" : "gap-3 px-3 py-3"
                 } text-sm font-medium ${
                   active
-                    ? "bg-[var(--accent)] text-white shadow-sm"
-                    : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)]"
+                    ? "bg-black/5 dark:bg-white/10 text-foreground dark:text-white shadow-sm"
+                    : "text-foreground/70 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground dark:hover:text-white"
                 }`}
                 title={isCollapsed ? item.label : undefined}
               >
+                {active && (
+                  <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-1 h-6 bg-foreground dark:bg-white rounded-r-full" />
+                )}
+                
                 <Icon
-                  className={`shrink-0 ${isCollapsed ? "h-6 w-6" : "h-5 w-5"} ${
-                    active ? "opacity-100" : "opacity-75 group-hover:opacity-100"
-                  } transition-opacity duration-200`}
+                  className={`shrink-0 ${isCollapsed ? "h-[20px] w-[20px]" : "h-[18px] w-[18px]"} ${
+                    active ? "text-foreground dark:text-white" : "text-foreground/70 dark:text-white/60 group-hover:text-foreground dark:group-hover:text-white"
+                  } transition-colors`}
                 />
                 {!isCollapsed && (
                   <span className="truncate">{item.label}</span>
@@ -101,12 +103,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }: SidebarProps) 
         </nav>
 
         {/* Mobile Logout */}
-        <div className="p-4 border-t border-[var(--border)] md:hidden shrink-0">
+        <div className="p-4 border-t border-border/50 md:hidden shrink-0">
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >
-            <LogOut className="h-5 w-5 opacity-80 shrink-0" />
+            <LogOut className="h-[18px] w-[18px] shrink-0" />
             {!isCollapsed && <span className="truncate">Logout</span>}
           </button>
         </div>

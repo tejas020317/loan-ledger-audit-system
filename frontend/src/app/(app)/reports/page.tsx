@@ -109,7 +109,7 @@ export default function ReportsPage() {
       </div>
 
       {tab === "outstanding" && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card overflow-hidden outline-none !p-0">
           <div style={{ padding: "1rem", display: "flex", justifyContent: "flex-end", borderBottom: "1px solid var(--border)" }}>
             <span style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Export options are available on individual views.</span>
           </div>
@@ -120,25 +120,25 @@ export default function ReportsPage() {
               <table>
                 <thead>
                   <tr>
-                    <th>Loan ID</th>
-                    <th>Customer</th>
-                    <th>A/C No</th>
-                    <th>Loan Amount</th>
-                    <th>Remaining Bal</th>
-                    <th>Interest Due</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Loan ID</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">A/C No</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Loan Amount</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Remaining Bal</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Interest Due</th>
                   </tr>
                 </thead>
                 <tbody>
                   {outstanding.map((o) => (
-                    <tr key={o.loan_id}>
-                      <td style={{ fontWeight: 600 }}>
+                    <tr key={o.loan_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                      <td className="p-4 align-middle font-medium text-foreground">
                         <Link href={`/loans/${o.loan_id}`} style={{ textDecoration: "none", color: "#3b82f6" }}>
                           #{o.loan_id}
                         </Link>
                       </td>
-                      <td>{o.customer_name}</td>
-                      <td>{o.account_number}</td>
-                      <td>{fmt(o.loan_amount)}</td>
+                      <td className="p-4 align-middle">{o.customer_name}</td>
+                      <td className="p-4 align-middle">{o.account_number}</td>
+                      <td className="p-4 align-middle">{fmt(o.loan_amount)}</td>
                       <td style={{ fontWeight: 600, color: "#ef4444" }}>{fmt(o.remaining_balance)}</td>
                       <td style={{ color: "#f59e0b" }}>{fmt(o.interest_due)}</td>
                     </tr>
@@ -158,10 +158,9 @@ export default function ReportsPage() {
       )}
 
       {tab === "fd" && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card overflow-hidden outline-none !p-0">
           <div style={{ padding: "1rem", display: "flex", justifyContent: "flex-end", borderBottom: "1px solid var(--border)" }}>
-            <button 
-              className="btn btn-secondary" 
+            <button className="btn btn-secondary border-border shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" 
               onClick={() => reportApi.downloadFDMaturity().catch(e => toast(e.message, "error"))}
               style={{ fontSize: "0.875rem", padding: "0.5rem 1rem" }}
             >
@@ -175,22 +174,22 @@ export default function ReportsPage() {
               <table>
                 <thead>
                   <tr>
-                    <th>FD ID</th>
-                    <th>Customer</th>
-                    <th>A/C No</th>
-                    <th>Deposit</th>
-                    <th>Maturity Date</th>
-                    <th>Maturity Amount</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">FD ID</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">A/C No</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Deposit</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Maturity Date</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Maturity Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {fdMaturity.map((f) => (
-                    <tr key={f.fd_id}>
-                      <td style={{ fontWeight: 600 }}>#{f.fd_id}</td>
-                      <td>{f.customer_name}</td>
-                      <td>{f.account_number}</td>
-                      <td>{fmt(f.deposit_amount)}</td>
-                      <td>{new Date(f.maturity_date).toLocaleDateString("en-IN")}</td>
+                    <tr key={f.fd_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                      <td className="p-4 align-middle font-medium text-foreground">#{f.fd_id}</td>
+                      <td className="p-4 align-middle">{f.customer_name}</td>
+                      <td className="p-4 align-middle">{f.account_number}</td>
+                      <td className="p-4 align-middle">{fmt(f.deposit_amount)}</td>
+                      <td className="p-4 align-middle">{new Date(f.maturity_date).toLocaleDateString("en-IN")}</td>
                       <td style={{ fontWeight: 600, color: "#10b981" }}>{fmt(f.maturity_amount)}</td>
                     </tr>
                   ))}
@@ -230,12 +229,11 @@ export default function ReportsPage() {
           </div>
 
           {ledger && (
-            <div className="card" style={{ padding: 0 }}>
-              <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--border)", background: "#f8fafc" }}>
+            <div className="card overflow-hidden outline-none !p-0">
+              <div className="p-6 border-b border-border/50 bg-white/50 dark:bg-black/20">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
                   <h3 style={{ fontWeight: 600, margin: 0 }}>Ledger details for Loan #{ledger.loan_id}</h3>
-                  <button 
-                    className="btn btn-secondary" 
+                  <button className="btn btn-secondary border-border/50 shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" 
                     onClick={() => reportApi.downloadLoanLedger(ledger.loan_id).catch(e => toast(e.message, "error"))}
                     style={{ fontSize: "0.875rem", padding: "0.5rem 1rem" }}
                   >
@@ -243,17 +241,16 @@ export default function ReportsPage() {
                   </button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
-                   <div style={{ padding: ".75rem", background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>
-                     <div style={{ fontSize: ".7rem", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Original Principal</div>
+                   <div className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-border/40 dark:border-white/10">
+                     <div className="text-[0.7rem] text-muted-foreground font-semibold uppercase">Original Principal</div>
                      <div style={{ fontWeight: 600, marginTop: ".25rem" }}>{fmt(ledger.original_principal)}</div>
                    </div>
-                   <div style={{ padding: ".75rem", background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>
-                     <div style={{ fontSize: ".7rem", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Type</div>
+                   <div className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-border/40 dark:border-white/10">
+                     <div className="text-[0.7rem] text-muted-foreground font-semibold uppercase">Type</div>
                      <div style={{ fontWeight: 600, marginTop: ".25rem", textTransform: "capitalize" }}>{ledger.type}</div>
                    </div>
-                   <div style={{ padding: ".75rem", background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>
-                     <div style={{ fontSize: ".7rem", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Current Outstanding</div>
-                     <div style={{ fontWeight: 600, marginTop: ".25rem", color: "#8b5cf6" }}>{fmt(ledger.current_outstanding)}</div>
+                   <div className="p-3 bg-white/60 dark:bg-white/5 rounded-lg border border-border/40 dark:border-white/10">
+                     <div className="text-[0.7rem] text-muted-foreground font-semibold uppercase">Current Outstanding</div>
                    </div>
                 </div>
               </div>
@@ -262,19 +259,19 @@ export default function ReportsPage() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Payment</th>
-                      <th>Interest Paid</th>
-                      <th>Principal Paid</th>
-                      <th>Remaining Balance</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Payment</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Interest Paid</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Principal Paid</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Remaining Balance</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ledger.ledger.map((row, idx) => (
-                      <tr key={idx}>
-                        <td>{new Date(row.date).toLocaleDateString("en-IN")}</td>
-                        <td style={{ fontWeight: 600 }}>{fmt(row.payment)}</td>
-                        <td style={{ color: "#f59e0b" }}>{fmt(row.interest_paid)}</td>
+                      <tr key={idx} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                        <td className="p-4 align-middle">{new Date(row.date).toLocaleDateString("en-IN")}</td>
+                        <td className="p-4 align-middle font-medium text-foreground">{fmt(row.payment)}</td>
+                        <td style={{ color: "#f59e0b" }}>{fmt(row.interest_charged)}</td>
                         <td style={{ color: "#3b82f6" }}>{fmt(row.principal_paid)}</td>
                         <td style={{ fontWeight: 600, color: "#8b5cf6" }}>{fmt(row.remaining_balance)}</td>
                       </tr>

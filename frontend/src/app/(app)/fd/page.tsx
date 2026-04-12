@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Search, Eye, Trash2, FileText, CheckCircle, Calculator } from "lucide-react";
 import { fdApi, customerApi, FD, Customer, FDMaturity } from "@/lib/api";
 import { toast } from "@/components/Toast";
 
 const EMPTY_FD = {
   customer_id: "", deposit_amount: "", interest_rate: "", interest_type: "simple",
-  compounding_frequency: "quarterly", start_date: "", duration_months: "",
+    compounding_frequency: "quarterly",
+    deposit_type: "FIXED", start_date: "", duration_months: "",
 };
 
 const EMPTY_CALC = {
   deposit_amount: "", interest_rate: "", interest_type: "simple",
-  compounding_frequency: "quarterly", start_date: new Date().toISOString().split("T")[0], duration_months: "",
+    compounding_frequency: "quarterly",
+    deposit_type: "FIXED", start_date: new Date().toISOString().split("T")[0], duration_months: "",
 };
 
 const freqLabel: Record<string, string> = { monthly: "Monthly", quarterly: "Quarterly", half_yearly: "Half-Yearly", yearly: "Yearly" };
@@ -39,8 +42,17 @@ export default function FDPage() {
 
   useEffect(() => { load(); }, []);
 
-  const setF = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-  const setC = (k: string, v: string) => { setCalcForm((p) => ({ ...p, [k]: v })); setMaturity(null); };
+  const setF = (k: string, v: string) => setForm((p) => { 
+    if (k === "interest_type" && v === "simple") return { ...p, [k]: v, compounding_frequency: "" };
+    return { ...p, [k]: v };
+  });
+  const setC = (k: string, v: string) => { 
+    setCalcForm((p) => {
+      if (k === "interest_type" && v === "simple") return { ...p, [k]: v, compounding_frequency: "" };
+      return { ...p, [k]: v };
+    }); 
+    setMaturity(null); 
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,10 +60,11 @@ export default function FDPage() {
     try {
       await fdApi.create({
         customer_id: Number(form.customer_id),
-        deposit_amount: Number(form.deposit_amount),
+        deposit_amount: form.deposit_type === "FLEXIBLE" ? 0 : Number(form.deposit_amount),
         interest_rate: Number(form.interest_rate),
         interest_type: form.interest_type as FD["interest_type"],
         compounding_frequency: form.compounding_frequency as FD["compounding_frequency"],
+        deposit_type: form.deposit_type as FD["deposit_type"],
         start_date: form.start_date,
         duration_months: Number(form.duration_months),
       });
@@ -75,6 +88,7 @@ export default function FDPage() {
         interest_rate: Number(calcForm.interest_rate),
         interest_type: calcForm.interest_type as FD["interest_type"],
         compounding_frequency: calcForm.compounding_frequency as FD["compounding_frequency"],
+        deposit_type: calcForm.deposit_type as FD["deposit_type"],
         start_date: calcForm.start_date,
         duration_months: Number(calcForm.duration_months),
       });
@@ -107,64 +121,68 @@ export default function FDPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Fixed Deposits</h1>
-        <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+      <div className="page-header mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Fixed Deposits</h1>
+        </div>
+        <div className="flex items-center gap-3">
           <input className="input" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 200 }} />
-          <button className="btn btn-secondary" onClick={() => setShowCalc(true)}>🧮 Calculator</button>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>➕ New FD</button>
+          <button className="btn btn-secondary border-border shadow-sm text-foreground bg-secondary/50 hover:bg-secondary" onClick={() => setShowCalc(true)}>🧮 Calculator</button>
+          <button className="btn btn-primary shadow-sm" onClick={() => setShowModal(true)}>➕ New FD</button>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card overflow-hidden outline-none !p-0">
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>FD ID</th>
-                <th>Customer</th>
-                <th>Deposit Amount</th>
-                <th>Rate</th>
-                <th>Type</th>
-                <th>Frequency</th>
-                <th>Start Date</th>
-                <th>Maturity Date</th>
-                <th>Maturity Amount</th>
-                <th>Interest Earned</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">FD ID</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Customer</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Deposit Amount</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Rate</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Frequency</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Start Date</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Maturity Date</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Maturity Amount</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Interest Earned</th>
+                <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan={11} style={{ textAlign: "center", padding: "3rem" }}><div className="spinner" style={{ margin: "auto" }} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={11} className="empty-state">No fixed deposits found</td></tr>
+                <tr><td colSpan={11} className="h-24 text-center text-muted-foreground">No fixed deposits found</td></tr>
               ) : filtered.map((f) => (
-                <tr key={f.fd_id}>
-                  <td style={{ fontWeight: 600, color: "var(--accent)" }}>#{f.fd_id}</td>
-                  <td>{f.customer?.name ?? `Customer #${f.customer_id}`}</td>
-                  <td style={{ fontWeight: 600 }}>{fmt(f.deposit_amount)}</td>
-                  <td>{f.interest_rate}%</td>
-                  <td>
-                    <span className={`badge ${f.interest_type === "simple" ? "badge-info" : "badge-warning"}`}>
+                <tr key={f.fd_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                  <td className="p-4 align-middle font-medium text-primary">#{f.fd_id}</td>
+                  <td className="p-4 align-middle">{f.customer?.name ?? `Customer #${f.customer_id}`}</td>
+                  <td className="p-4 align-middle font-medium text-foreground">{fmt(f.deposit_amount)}</td>
+                  <td className="p-4 align-middle">{f.interest_rate}%</td>
+                  <td className="p-4 align-middle">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${f.interest_type === "simple" ? "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/30" : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/30"}`}>
                       {f.interest_type}
                     </span>
                   </td>
-                  <td style={{ color: "var(--text-muted)", fontSize: ".8rem" }}>
+                  <td className="p-4 align-middle text-sm text-muted-foreground">
                     {f.compounding_frequency ? freqLabel[f.compounding_frequency] : "—"}
                   </td>
-                  <td style={{ color: "var(--text-muted)" }}>{new Date(f.start_date).toLocaleDateString("en-IN")}</td>
-                  <td style={{ fontWeight: 500 }}>{new Date(f.maturity_date).toLocaleDateString("en-IN")}</td>
-                  <td style={{ fontWeight: 700, color: "#8b5cf6" }}>{fmt(f.maturity_amount)}</td>
-                  <td style={{ color: "#10b981", fontWeight: 600 }}>+{fmt(f.interest_earned)}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleDelete(f.fd_id)}
-                      style={{ background: 'var(--danger)', color: 'white', fontSize: '0.75rem', padding: '0.4rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
+                  <td className="p-4 align-middle text-muted-foreground">{new Date(f.start_date).toLocaleDateString("en-IN")}</td>
+                  <td className="p-4 align-middle font-medium">{new Date(f.maturity_date).toLocaleDateString("en-IN")}</td>
+                  <td className="p-4 align-middle font-bold text-violet-500 dark:text-violet-400">{fmt(f.maturity_amount)}</td>
+                  <td className="p-4 align-middle font-semibold text-emerald-600 dark:text-emerald-400">+{fmt(f.interest_earned)}</td>
+                  <td className="p-4 align-middle text-center w-[180px]">
+                    <div className="flex justify-center">
+                      <button 
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                        onClick={() => handleDelete(f.fd_id)}
+                        title="Delete FD"
+                      >
+                        <Trash2 className="w-3.5 h-3.5"/>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -175,8 +193,8 @@ export default function FDPage() {
 
       {/* Create FD Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Open Fixed Deposit</h2>
             <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>
@@ -187,30 +205,35 @@ export default function FDPage() {
                 </select>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                <div>
-                  <label className="label">Deposit Amount (₹) *</label>
-                  <input className="input" type="number" min="1" placeholder="100000" required value={form.deposit_amount} onChange={(e) => setF("deposit_amount", e.target.value)} />
-                </div>
+                {form.deposit_type !== "FLEXIBLE" && (
+                  <div>
+                    <label className="label">Initial Deposit Amount (₹) *</label>
+                    <input className="input" type="number" min="1" placeholder="100000" required value={form.deposit_amount} onChange={(e) => setF("deposit_amount", e.target.value)} />
+                  </div>
+                )}
                 <div>
                   <label className="label">Interest Rate (%) *</label>
                   <input className="input" type="number" step="0.01" placeholder="7.5" required value={form.interest_rate} onChange={(e) => setF("interest_rate", e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Interest Type *</label>
+                  <label className="label">Interest Type: Simple / Compound *</label>
                   <select className="input" value={form.interest_type} onChange={(e) => setF("interest_type", e.target.value)}>
                     <option value="simple">Simple</option>
                     <option value="compound">Compound</option>
                   </select>
                 </div>
-                <div>
-                  <label className="label">Compounding Frequency</label>
-                  <select className="input" value={form.compounding_frequency} onChange={(e) => setF("compounding_frequency", e.target.value)} disabled={form.interest_type === "simple"}>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="half_yearly">Half-Yearly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
+                {form.interest_type === "compound" && (
+                  <div>
+                    <label className="label">Compounding Frequency *</label>
+                    <select className="input" required value={form.compounding_frequency} onChange={(e) => setF("compounding_frequency", e.target.value)}>
+                      <option value="">Select...</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="quarterly">Quarterly</option>
+                      <option value="half_yearly">Half-Yearly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className="label">Start Date *</label>
                   <input className="input" type="date" required value={form.start_date} onChange={(e) => setF("start_date", e.target.value)} />
@@ -218,6 +241,13 @@ export default function FDPage() {
                 <div>
                   <label className="label">Duration (months) *</label>
                   <input className="input" type="number" min="1" placeholder="12" required value={form.duration_months} onChange={(e) => setF("duration_months", e.target.value)} />
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label className="label">Deposit Type *</label>
+                  <select className="input" value={form.deposit_type} onChange={(e) => setF("deposit_type", e.target.value)}>
+                    <option value="FIXED">Standard FIXED</option>
+                    <option value="FLEXIBLE">Flexible / Recurring</option>
+                  </select>
                 </div>
               </div>
               <div style={{ display: "flex", gap: ".75rem", marginTop: ".5rem" }}>
@@ -231,8 +261,8 @@ export default function FDPage() {
 
       {/* Maturity Calculator Modal */}
       {showCalc && (
-        <div className="modal-overlay" onClick={() => setShowCalc(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowCalc(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>🧮 FD Maturity Calculator</h2>
             <form onSubmit={handleCalculate} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
@@ -245,21 +275,24 @@ export default function FDPage() {
                   <input className="input" type="number" step="0.01" placeholder="7.5" required value={calcForm.interest_rate} onChange={(e) => setC("interest_rate", e.target.value)} />
                 </div>
                 <div>
-                  <label className="label">Interest Type *</label>
+                  <label className="label">Interest Type: Simple / Compound *</label>
                   <select className="input" value={calcForm.interest_type} onChange={(e) => setC("interest_type", e.target.value)}>
                     <option value="simple">Simple</option>
                     <option value="compound">Compound</option>
                   </select>
                 </div>
-                <div>
-                  <label className="label">Compounding</label>
-                  <select className="input" value={calcForm.compounding_frequency} onChange={(e) => setC("compounding_frequency", e.target.value)} disabled={calcForm.interest_type === "simple"}>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="half_yearly">Half-Yearly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
+                {calcForm.interest_type === "compound" && (
+                  <div>
+                    <label className="label">Compounding Frequency *</label>
+                    <select className="input" required value={calcForm.compounding_frequency} onChange={(e) => setC("compounding_frequency", e.target.value)}>
+                      <option value="">Select...</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="quarterly">Quarterly</option>
+                      <option value="half_yearly">Half-Yearly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className="label">Start Date *</label>
                   <input className="input" type="date" required value={calcForm.start_date} onChange={(e) => setC("start_date", e.target.value)} />
@@ -268,15 +301,22 @@ export default function FDPage() {
                   <label className="label">Duration (months) *</label>
                   <input className="input" type="number" min="1" placeholder="12" required value={calcForm.duration_months} onChange={(e) => setC("duration_months", e.target.value)} />
                 </div>
-              </div>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <label className="label">Deposit Type *</label>
+                    <select className="input" value={calcForm.deposit_type} onChange={(e) => setC("deposit_type", e.target.value)}>
+                      <option value="FIXED">Standard FIXED</option>
+                      <option value="FLEXIBLE">Flexible / Recurring</option>
+                    </select>
+                  </div>
+                </div>
 
-              <button type="submit" className="btn btn-primary" style={{ justifyContent: "center" }} disabled={calculating}>
-                {calculating ? "Calculating…" : "Calculate Maturity"}
-              </button>
-            </form>
+                <button type="submit" className="btn btn-primary" style={{ justifyContent: "center" }} disabled={calculating}>
+                  {calculating ? "Calculating…" : "Calculate Maturity"}
+                </button>
+              </form>
 
-            {maturity && (
-              <div style={{ marginTop: "1.5rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: "1.25rem" }}>
+              {maturity && (
+                <div style={{ marginTop: "1.5rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 10, padding: "1.25rem" }}>
                 <h3 style={{ fontWeight: 600, color: "#065f46", marginBottom: "1rem" }}>📊 Maturity Results</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: ".75rem", textAlign: "center" }}>
                   <div>

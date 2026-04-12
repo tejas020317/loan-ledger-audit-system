@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Search, Eye, Trash2, FileText, CheckCircle, Calculator } from "lucide-react";
 import { customerApi, reportApi, Customer } from "@/lib/api";
 import { toast } from "@/components/Toast";
 
@@ -59,57 +60,60 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Customers</h1>
-        <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+      <div className="page-header mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Customers</h1>
+        </div>
+        <div className="flex items-center gap-3">
           <input className="input" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 220 }} />
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>➕ Add Customer</button>
+          <button className="btn btn-primary shadow-sm" onClick={() => setShowModal(true)}><Plus className="mr-2 w-4 h-4"/> Add Customer</button>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
+      <div className="card overflow-hidden outline-none !p-0">
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Account No.</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Joined</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">#</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Account No.</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Phone</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Joined</th>
+                <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan={7} style={{ textAlign: "center", padding: "3rem" }}><div className="spinner" style={{ margin: "auto" }} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="empty-state">No customers found</td></tr>
+                <tr><td colSpan={7} className="h-24 text-center text-muted-foreground">No customers found</td></tr>
               ) : filtered.map((c) => (
-                <tr key={c.customer_id}>
-                  <td style={{ color: "var(--text-muted)", fontSize: ".8rem" }}>#{c.customer_id}</td>
-                  <td style={{ fontWeight: 600 }}>{c.name}</td>
-                  <td><span className="badge badge-info">{c.account_number}</span></td>
-                  <td>{c.phone ?? "—"}</td>
-                  <td>{c.email ?? "—"}</td>
-                  <td style={{ color: "var(--text-muted)" }}>{new Date(c.created_at).toLocaleDateString("en-IN")}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <button 
-                      className="btn btn-secondary" 
-                      onClick={() => reportApi.downloadCustomerSummary(c.customer_id).catch(e => toast(e.message, "error"))}
-                      style={{ fontSize: "0.75rem", padding: "0.4rem 0.6rem" }}
-                      title="Download PDF Summary"
-                    >
-                      📄 Summary
-                    </button>
-                    <button
-                      className="btn-danger"
-                      onClick={() => handleDelete(c.customer_id)}
-                      style={{ background: 'var(--danger)', color: 'white', marginLeft: '0.5rem', fontSize: '0.75rem', padding: '0.4rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Delete
-                    </button>
+                <tr key={c.customer_id} className="transition-colors hover:bg-muted/30 border-b border-border last:border-0">
+                  <td className="p-4 align-middle text-sm text-muted-foreground">#{c.customer_id}</td>
+                  <td className="p-4 align-middle font-medium text-foreground">{c.name}</td>
+                  <td className="p-4 align-middle"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30">{c.account_number}</span></td>
+                  <td className="p-4 align-middle">{c.phone ?? "—"}</td>
+                  <td className="p-4 align-middle">{c.email ?? "—"}</td>
+                  <td className="p-4 align-middle text-muted-foreground">{new Date(c.created_at).toLocaleDateString("en-IN")}</td>
+                  <td className="p-4 align-middle text-center w-[180px]">
+                    <div className="flex items-center justify-center gap-2">
+                      <button 
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                        onClick={() => reportApi.downloadCustomerSummary(c.customer_id).catch(e => toast(e.message, "error"))}
+                        title="Download PDF Summary"
+                      >
+                        <FileText className="w-3.5 h-3.5"/> Summary
+                      </button>
+                      <button 
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white"
+                        onClick={() => handleDelete(c.customer_id)}
+                        title="Delete Customer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5"/>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -119,8 +123,8 @@ export default function CustomersPage() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-all duration-100 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowModal(false)}>
+          <div className="bg-card w-full max-w-lg rounded-2xl shadow-lg border border-border p-6 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontWeight: 700, marginBottom: "1.5rem", fontSize: "1.1rem" }}>Add New Customer</h2>
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {([

@@ -17,6 +17,11 @@ const FixedDeposit = sequelize.define(
         key: "customer_id",
       },
     },
+    deposit_type: {
+      type: DataTypes.ENUM("FIXED", "FLEXIBLE"),
+      allowNull: false,
+      defaultValue: "FIXED",
+    },
     deposit_amount: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,

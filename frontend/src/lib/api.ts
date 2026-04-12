@@ -243,11 +243,29 @@ export const fdApi = {
         body: JSON.stringify(body),
       },
     ),
+  addDeposit: (fdId: number, date: string, amount: number) =>
+    apiFetch<{ success: boolean; data: any }>(
+      `/fixed-deposits/${fdId}/deposits`,
+      {
+        method: "POST",
+        body: JSON.stringify({ date, amount }),
+      },
+    ),
 };
+
+export interface FdTransaction {
+  id?: number;
+  fd_id: number;
+  transaction_date: string;
+  deposit_amount: number;
+  interest_added: number;
+  balance: number;
+}
 
 export interface FD {
   fd_id: number;
   customer_id: number;
+  deposit_type?: "FIXED" | "FLEXIBLE";
   deposit_amount: number;
   interest_rate: number;
   interest_type: "simple" | "compound";
@@ -259,6 +277,8 @@ export interface FD {
   interest_earned: number;
   maturity_date: string;
   created_at: string;
+  transactions?: FdTransaction[];
+  total_deposited?: number;
 }
 
 export interface FDMaturity {

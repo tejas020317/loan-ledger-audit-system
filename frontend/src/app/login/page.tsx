@@ -1,109 +1,107 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
+import { LogIn, Eye, EyeOff } from "lucide-react";
+import FloatingLines from "@/components/FloatingLines";
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const { login, loading } = useAuth();
+  const { theme, setTheme, systemTheme } = useTheme();
+  
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const currentTheme = theme === 'system' ? systemTheme : theme;
+  const isDark = mounted && currentTheme === 'dark';
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      await login(email, password);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    login(username, password);
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%)",
-        padding: "1rem",
-      }}
-    >
-      {/* Decorative orbs */}
-      <div style={{
-        position: "fixed", top: "15%", left: "10%", width: 320, height: 320,
-        borderRadius: "50%", background: "rgba(59,130,246,.12)", filter: "blur(80px)", pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "fixed", bottom: "15%", right: "10%", width: 280, height: 280,
-        borderRadius: "50%", background: "rgba(16,185,129,.08)", filter: "blur(80px)", pointerEvents: "none",
-      }} />
+    <div className="relative min-h-screen w-full flex items-center justify-center transition-colors duration-500 overflow-hidden bg-background">
+      {/* Light mode gradient background */}
+      {!isDark && (
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-50 via-white to-indigo-100 pointer-events-none transition-opacity duration-1000 opacity-100" />
+      )}
 
-      <div style={{
-        width: "100%", maxWidth: 420,
-        background: "rgba(255,255,255,.04)",
-        backdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,.1)",
-        borderRadius: 20,
-        padding: "2.5rem",
-        boxShadow: "0 25px 60px rgba(0,0,0,.4)",
-      }}>
-        {/* Brand */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ fontSize: "2.5rem", marginBottom: ".5rem" }}>🏛️</div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#fff", marginBottom: ".25rem" }}>
-            BankLoan Manager
+      {/* Dark mode FloatingLines background */}
+      {isDark && (
+        <div className="absolute inset-0 z-0 transition-opacity duration-1000 opacity-100">
+          <FloatingLines />
+        </div>
+      )}
+      {isDark && <div className="absolute inset-0 z-0 bg-transparent pointer-events-none" />}
+
+      {/* Theme Toggle */}
+      <button 
+        onClick={() => setTheme(isDark ? 'light' : 'dark')}
+        className="absolute top-6 right-6 z-20 p-2 rounded-full bg-card/60 backdrop-blur-sm border border-border shadow-sm hover:scale-110 transition-transform"
+      >
+        {isDark ? <Sun className="h-5 w-5 text-yellow-400" /> : <Moon className="h-5 w-5 text-indigo-600" />}
+      </button>
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md p-8 sm:p-10 card shadow-xl animate-in fade-in slide-in-from-bottom-8 duration-500 rounded-3xl mx-4">
+        <div className="flex flex-col items-center mb-8 gap-2">
+          <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2 shadow-sm ring-1 ring-primary/20">
+            <LogIn className="h-8 w-8" />
+          </div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500 pb-1">
+            BankLoan
           </h1>
-          <p style={{ fontSize: ".875rem", color: "#94a3b8" }}>Sign in to your account</p>
+          <p className="text-muted-foreground text-sm font-medium">Core Banking Portal</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
-          <div>
-            <label className="label" style={{ color: "#94a3b8" }}>Email address</label>
+        <form onSubmit={handleLogin} className="flex flex-col gap-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-foreground/80">Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@bank.com"
+              type="text"
               required
-              className="input"
-              style={{ background: "rgba(255,255,255,.07)", borderColor: "rgba(255,255,255,.12)", color: "#fff" }}
+              className="input transition-colors hover:border-primary/50 focus:bg-background h-12"
+              placeholder="e.g. admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div>
-            <label className="label" style={{ color: "#94a3b8" }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="input"
-              style={{ background: "rgba(255,255,255,.07)", borderColor: "rgba(255,255,255,.12)", color: "#fff" }}
-            />
-          </div>
-
-          {error && (
-            <div style={{
-              background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)",
-              borderRadius: 8, padding: ".75rem 1rem", color: "#fca5a5", fontSize: ".875rem",
-            }}>
-              ✕ &ensp;{error}
+          
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-foreground/80">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="input transition-colors hover:border-primary/50 focus:bg-background h-12 pr-10"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
-          )}
-
+          </div>
+          
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary"
-            style={{ padding: ".75rem", fontSize: "1rem", justifyContent: "center", marginTop: ".5rem" }}
+            className="btn btn-primary h-12 w-full mt-4 font-semibold text-base shadow-lg shadow-primary/30"
           >
-            {loading ? <span className="spinner" style={{ width: 18, height: 18 }} /> : "Sign In →"}
+            {loading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
       </div>
