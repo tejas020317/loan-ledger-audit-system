@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    // Repo-local patch scripts (not part of the app)
+    "patch*.js",
+    "frontend_patch*.js",
   ]),
 ]);
 

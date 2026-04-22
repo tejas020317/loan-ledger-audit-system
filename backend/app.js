@@ -5,7 +5,25 @@ const { authenticate } = require("./middleware/auth");
 const app = express();
 
 // --------------- Middleware ---------------
-app.use(cors());
+const corsOrigins = process.env.CORS_ORIGIN;
+if (corsOrigins) {
+  const origins = corsOrigins
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  const allowed = new Set(origins);
+  app.use(
+    cors({
+      origin: (origin, cb) => {
+        if (!origin) return cb(null, true); // allow curl/Postman/mobile apps
+        return cb(null, allowed.has(origin));
+      },
+    }),
+  );
+} else {
+  app.use(cors());
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
